@@ -1,0 +1,69 @@
+def break_pieces(shape):
+  spaces = []
+  result = []
+#turning the string into a list of lists
+  source = [list(el) for el in shape.split('\n') if len(el)>1]    
+#creating a list of spaces  
+  for m in range(len(source)):
+    for n in range(len(source[m])):
+      if source[m][n] == ' ':        
+        spaces.append([m, n])         
+#checking the spaces for their surrounding cells                          
+  while spaces:  
+    x, y = spaces[0]              
+    to_visit = {(x, y)}
+    visited = set()
+#creating an empty 'board' on the base of which the first form will be created
+    t = [[' ' for j in range(len(source[i]))] for i in range(len(source))] 
+#filling the form 
+    closed = True       
+    while to_visit:       
+      x, y = to_visit.pop()                   
+      for a, b in [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]:                        
+        if 0<=a<len(source) and 0<=b<len(source[a]) and source[a][b] == ' ' and ((a, b) not in visited):              
+          to_visit.add((a, b))            
+        elif 0<=a<len(source) and 0<=b<len(source[a]) and source[a][b] != ' ':
+          t[a][b] = source[a][b]
+        visited.add((x, y))  
+    for (a, b) in visited:
+      if a == 0 or b == 0 or a == len(source)-1 or b == len(source[a])-1:
+        closed = False  
+      spaces.remove([a, b])        
+  #removing possible extra pluses from the form and checking for the closeness  
+    if closed == True:        
+      lst_plus = []    
+      for i in range(len(t)):
+        for j in range(len(t[i])):
+          if t[i][j] == '+':
+            lst_plus.append((i, j))                         
+      while lst_plus:
+        a, b = lst_plus.pop()
+        lst = []
+        for c, d in [(a+1, b), (a-1, b), (a, b+1), (a, b-1)]:         
+          if 0<=c<len(t) and 0<=d<len(t[c]) and t[c][d] != ' ':          
+            lst.append((c, d))       
+        if len(lst) == 2:   
+          if (a+1)<len(t) and 0<=(a-1) and 0<=b<len(t[a-1]) and 0<=b<len(t[a+1]) and t[a+1][b] != ' ' and t[a-1][b] != ' ':
+            t[a][b] = '|'
+          elif 0<=a<len(t) and 0<(b-1) and (b+1)<len(t[a]) and t[a][b+1] != ' ' and t[a][b-1] != ' ':
+            t[a][b] = '-'  
+        elif len(lst)<2:          
+          t = [] 
+    else:      
+      t = None                
+    if t: 
+      #striping the extra spaces 
+      
+      lst_min = []
+      t = [t[i] for i in range(len(t)) if (t[i].count(' ')!=len(t[i]))]      
+      for i in range(len(t)):     
+                
+        min_num = min((pos for pos, val in enumerate(t[i]) if val != ' '), default=None)  
+        
+        lst_min.append(min_num) 
+      
+      min_occurance = min(lst_min)        
+      t = [t[j][min_occurance:(max(pos for pos, val in enumerate(t[j]) if val != ' ')+1)] for j in range(len(t))]
+      form = '\n'.join([''.join(t[i]) for i in range(len(t))]) 
+      result.append(form)       
+  return result                      
